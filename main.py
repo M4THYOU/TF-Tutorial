@@ -57,7 +57,7 @@ output_layer_bias = tf.Variable(tf.random_normal([output_nodes]))
 #layers in a network, thus defining total number of weights: 784x500.
 #Shape for layer_1: 784x500 means there are 392000 weights between input/layer1
 #Bias's do not connect to any previous layer. That is why there is only one arg
-#for it's weights: the number of nodes in applicable layer.
+#for it's weights: the number of nodes in the applicable layer.
 
 #Feedforward Calculations
 #Using Rectified Linear Unit (ReLU) as the squasher. Output == 0 or input.
