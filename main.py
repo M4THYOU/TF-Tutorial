@@ -3,6 +3,7 @@ from tensorflow.examples.tutorials.mnist import input_data #import a big dataset
 #from tensorflow. 70k images: 55k training, 10k testing, 5k validation
 #just a bunch of images of handwritten numbers.
 #These images are 28x28 pixels
+#All tensors are basically just matrices with a defined shape.
 
 mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 #downloads/prepares data for our use. Directory is where this happens, turns on
@@ -26,6 +27,7 @@ output_nodes = 10#one for each possible output (0-9)
 #feedforward usually has just 2. For input layer, and for target output layer
 network_input = tf.placeholder(tf.float32, [None,784])
 target_output = tf.placeholder(tf.float32, [None, output_nodes])
+#None means the dimension can be any length.
 #tf.float32 - a datatype. 32 vs 64 bit - lower resolution but uses less memory
 #32 bit FLOATING point number.
 #[None, 784] - defines shape of input layer. [length, width]
@@ -61,17 +63,52 @@ output_layer_bias = tf.Variable(tf.random_normal([output_nodes]))
 
 #Feedforward Calculations
 #Using Rectified Linear Unit (ReLU) as the squasher. Output == 0 or input.
+#Formula for ReLU: max(0, input) <-- If input is negative, output is 0.
 layer_1_output = tf.nn.relu(tf.matmul(network_input,layer_1)+ layer_1_bias)
 layer_2_output = tf.nn.relu(tf.matmul(layer_1_output,layer_2) + layer_2_bias)
 layer_3_output = tf.nn.relu(tf.matmul(layer_2_output,layer_3) + layer_3_bias)
-
-
+#Calculates output of every node in layers 1, 2, 3.
+#tf.nn.relu is one of ten activation functions offered by TensorFlow. Creates a
+#tensor. Takes 1 arg, features. Features must be a certain type of tensor, like
+#float32. Here we pass it the product of matmul added to the layer's bias.
+#Matmul is a matrix multiplier. Multiplies argA by argB creates a tensor.
+#Adds this tensor with layer bias matrix to get total node input.
+#For more on matrix operations see links.txt
+#That was the summation operator!
 
 network_output_1 = tf.matmul(layer_3_output,output_layer) + output_layer_bias
-
+#This is the same as in the previous lines. Matrix multiplication and added bias
+#to get final output of the outputs layer nodes. No squasher yet.
+#This output is called a "logit".
 
 
 network_output_2 = tf.nn.softmax(network_output_1)
+#Applying an activation function(squasher) to the logit. Calculates probability
+#of each logit sent through. 0-1 probability.
+#Softmax is specifically used for classification. Takes 1 arg: tensor of type
+#half, float32, or float64.
+#Creates final scaled output of the network.
+
+#To train a network we must include the network's prediction, cost function,
+#optimization function, and training step.
+cost_function = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=network_output_1, labels=target_output))
+#Gets the loss/cost of the teh network.
+#reduce_mean gets the mean(average) values of a tensor. Also reduces the size or
+#dimensions of the array.
+#In other words, it calculates the average of elements across tensor dimensions.
+
+
+train_step = tf.train.GradientDescentOptimizer(learning_rate).minimize(cost_function)
+
+
+
+correct_predictions = tf.equal(tf.argmax(network_output_2,1),tf.argmax(target_output,1))
+
+
+
+optimizer = tf.reduce_mean(tf.cast(correct_predictions, tf.float32))
+
+
 
 
 
